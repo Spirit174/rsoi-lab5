@@ -100,8 +100,13 @@ public class LoyaltyRepostirory : ILoyaltyRepository
         
         var dbLoyalty = await _context.Loyalties.FirstOrDefaultAsync(l => l.Username == userName);
 
+        if (dbLoyalty == null)
+        {
+            return null;
+        }
+
         _logger.LogDebug("Loyalty found for user: {UserName}. Count: {Count}, Status: {Status}", 
-            userName, dbLoyalty.ReservationCount, dbLoyalty.Status);
+            userName, dbLoyalty?.ReservationCount, dbLoyalty?.Status);
         
         return LoyaltyConverter.Convert(dbLoyalty);
     }
