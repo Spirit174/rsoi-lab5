@@ -19,7 +19,8 @@ public class LoyaltyContext(DbContextOptions<LoyaltyContext> options) : DbContex
                 .IsUnique();
             
             entity.Property(p => p.Id)
-                .HasColumnName("id"); 
+                .HasColumnName("id")
+                .ValueGeneratedOnAdd();
             
             entity.Property(p => p.Username)
                 .HasColumnName("username");
