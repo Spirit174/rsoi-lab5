@@ -80,7 +80,6 @@ public class Startup
         services.AddSingleton<ILoyaltyClient, LoyaltyClient>();
         services.AddSingleton<IPaymentClient, PaymentClient>();
         services.AddSingleton<IReservationClient, ReservationClient>();
-        services.AddHttpClient();
         services.AddHttpContextAccessor();
         services.AddScoped<IUserContext, UserContext>();
         
