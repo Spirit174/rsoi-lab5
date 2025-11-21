@@ -93,7 +93,6 @@ public class Startup
             c.SwaggerEndpoint("/api/v1/swagger/v1/swagger.json", "Person.Server.Http v1");
             c.RoutePrefix = "api/v1/swagger";
         });
-        app.UseRouting();
         app.UseAuthentication();
         app.UseAuthorization();
 
