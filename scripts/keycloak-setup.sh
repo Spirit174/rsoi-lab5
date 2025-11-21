@@ -59,7 +59,7 @@ curl -X POST \
   -H "Authorization: Bearer $ACCESS_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
-    "username": "spirit",
+    "username": "Spirit",
     "enabled": true,
     "email": "spirit@test.com",
     "firstName": "Spirit",

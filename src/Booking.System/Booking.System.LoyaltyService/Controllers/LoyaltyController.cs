@@ -42,7 +42,7 @@ public class LoyaltyController: ControllerBase
             
             _logger.LogInformation($"GetLoyaltyInfo: {username}");
             
-            var loyalty = await _loyaltyService.GetLoyaltyAndCreateIfNotExist(userName);
+            var loyalty = await _loyaltyService.GetLoyaltyAndCreateIfNotExist(username);
 
             return Ok(LoyaltyInfoDtoConverter.Convert(loyalty));
         }
@@ -74,7 +74,7 @@ public class LoyaltyController: ControllerBase
             }
             
             _logger.LogInformation($"UpdateLoyalty: {username}");
-            var loyalty = await _loyaltyService.GetLoyaltyAndCreateIfNotExist(userName);
+            var loyalty = await _loyaltyService.GetLoyaltyAndCreateIfNotExist(username);
 
             await _loyaltyService.UpdateLoyalty(loyalty.Username, isIncreaseBool.IsIncrease);
 
