@@ -16,13 +16,11 @@ public class DbLoyalty
     
     public int Discount { get; set; }
 
-    public DbLoyalty(int id,
-        string username,
+    public DbLoyalty(string username,
         int reservationCount,
         LoyaltyStatus status,
         int discount)
     {
-        Id = id;
         Username = username;
         ReservationCount = reservationCount;
         Status = status;

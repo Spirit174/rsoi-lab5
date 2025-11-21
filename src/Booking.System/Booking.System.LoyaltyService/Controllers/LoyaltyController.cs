@@ -24,13 +24,12 @@ public class LoyaltyController: ControllerBase
     /// <summary>
     /// Получить информацию о статусе в программе лояльности.
     /// </summary>
-    [HttpGet("loyalty/{userName}")]
+    [HttpGet("loyalty")]
     [Authorize]
-    public async Task<ActionResult<LoyaltyInfoDto>> GetLoyaltyInfo([FromRoute] string userName)
+    public async Task<ActionResult<LoyaltyInfoDto>> GetLoyaltyInfo()
     {
         try
         {
-            _logger.LogInformation($"GetLoyaltyInfo: {userName}");
             var username = User.FindFirst(ClaimTypes.NameIdentifier)?.Value 
                            ?? User.FindFirst("preferred_username")?.Value 
                            ?? User.FindFirst("sub")?.Value;

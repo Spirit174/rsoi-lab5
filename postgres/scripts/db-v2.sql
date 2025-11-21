@@ -60,5 +60,5 @@ CREATE TABLE loyalty
 );
 
 INSERT INTO public.loyalty(id, username, reservation_count, status, discount) VALUES (
-    '1', 'Spirit', 25,  'GOLD',  10
+    '1', 'Test Max', 25,  'GOLD',  10
 );

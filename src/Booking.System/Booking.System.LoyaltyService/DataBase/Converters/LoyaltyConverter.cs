@@ -17,8 +17,7 @@ public class LoyaltyConverter
     
     public static DbLoyalty Convert(Loyalty loyalty)
     {
-        return new DbLoyalty(loyalty.Id,
-            loyalty.Username,
+        return new DbLoyalty(loyalty.Username,
             loyalty.ReservationCount,
             LoyaltyStatusConverter.Convert(loyalty.Status),
             loyalty.Discount);

@@ -55,7 +55,7 @@ public class LoyaltyClient : ILoyaltyClient
             "LoyaltyService",
             async () =>
             {
-                var requestUrl = $"api/v1/loyalty/{userName}";
+                var requestUrl = $"api/v1/loyalty/";
                 var request = new RestRequest(requestUrl, Method.Get);
                 
                 var token = GetAuthToken();
