@@ -25,6 +25,9 @@ jobs:
         with:
           dotnet-version: '9.x'
           
+      - name: Install jq for JSON parsing
+        run: sudo apt-get install -y jq
+          
       - name: Install dependencies
         run: |
           dotnet restore ./src/Booking.System/Booking.System.LoyaltyService/Booking.System.LoyaltyService.csproj
