@@ -4,6 +4,7 @@ using Booking.System.Gateway.DTO;
 using Booking.System.Gateway.Exceptions;
 using Booking.System.Gateway.Services;
 using Booking.System.LoyaltyService.DTO.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
 
@@ -15,11 +16,15 @@ public class BookingController: ControllerBase
 {
     private readonly ILogger<BookingController> _logger;
     private readonly IGatewayService _gatewayService;
+    private IUserContext _userContext;
 
-    public BookingController(ILogger<BookingController> logger, IGatewayService gatewayService)
+    public BookingController(ILogger<BookingController> logger,
+        IGatewayService gatewayService,
+        IUserContext userContext)
     {
         _logger = logger;
         _gatewayService = gatewayService;
+        _userContext = userContext;
     }
 
     /// <summary>
@@ -30,6 +35,7 @@ public class BookingController: ControllerBase
     /// <response code="200">Список отелей успешно получен.</response>
     /// <response code="500">Ошибка на стороне сервера.</response>
     [HttpGet("hotels")]
+    [Authorize]
     [SwaggerOperation("Метод для получения списка отелей.", "Метод для получения списка отелей.")]
     [SwaggerResponse(statusCode: 200, description: "Список отелей успешно получен.")]
     [SwaggerResponse(statusCode: 500, type: typeof(ErrorResponse), description: "Ошибка на стороне сервера.")]
@@ -52,15 +58,20 @@ public class BookingController: ControllerBase
     /// <response code="200">Информация о пользователе успешно получена.</response>
     /// <response code="500">Ошибка на стороне сервера.</response>
     [HttpGet("me")]
+    [Authorize]
     [SwaggerOperation("Метод для получения информации о пользователе.", "Метод для получения информации о пользователе.")]
     [SwaggerResponse(statusCode: 200, description: "Информация о пользователе успешно получена.")]
     [SwaggerResponse(statusCode: 500, type: typeof(ErrorResponse), description: "Ошибка на стороне сервера.")]
     public async Task<ActionResult<UserInfoDto>> GetUserInfo()
     {
-        var username = Request.Headers["X-User-Name"].FirstOrDefault();
+        var username = _userContext.GetUsername();
         
+        /*if (string.IsNullOrEmpty(username))
+            return BadRequest("X-User-Name header is required");*/
         if (string.IsNullOrEmpty(username))
-            return BadRequest("X-User-Name header is required");
+        {
+            return Unauthorized(new { message = "Username Unauthorized" });
+        }
 
         var response = await _gatewayService.GetUserInfoAsync(username);
         
@@ -81,18 +92,24 @@ public class BookingController: ControllerBase
     /// <response code="400">Отсутствует заголовок.</response>
     /// <response code="500">Ошибка на стороне сервера.</response>
     [HttpGet("reservations")]
+    [Authorize]
     [SwaggerOperation("Метод для получения информации о всех бронированиях пользователя.", "Метод для получения информации о всех бронированиях пользователя.")]
     [SwaggerResponse(statusCode: 200, description: "Список бронирований успешно получен.")]
     [SwaggerResponse(statusCode: 400, type: typeof(ErrorResponse), description: "Отсутствует заголовок.")]
     [SwaggerResponse(statusCode: 500, type: typeof(ErrorResponse), description: "Ошибка на стороне сервера.")]
     public async Task<ActionResult<List<ReservationDtoWithHotelAndPayment>>> GetUserReservations()
     {
-        var username = Request.Headers["X-User-Name"].FirstOrDefault();
+        var username = _userContext.GetUsername();
         
+        /*if (string.IsNullOrEmpty(username))
+            return BadRequest("X-User-Name header is required");*/
         if (string.IsNullOrEmpty(username))
-            return BadRequest("X-User-Name header is required");
+        {
+            return Unauthorized(new { message = "Username Unauthorized" });
+        }
 
         var response = await _gatewayService.GetUserReservationsAsync(username);
+        
         
         if (!response.IsSuccess)
         {
@@ -113,6 +130,7 @@ public class BookingController: ControllerBase
     /// <response code="404">Бронирование не найдено.</response>
     /// <response code="500">Ошибка на стороне сервера.</response>
     [HttpGet("reservations/{reservationUid}")]
+    [Authorize]
     [SwaggerOperation("Метод для получения информации о конкретном бронирование пользователя.", "Метод для получения информации о конкретном бронирование пользователя.")]
     [SwaggerResponse(statusCode: 200, description: "Информация о бронировании успешно получена.")]
     [SwaggerResponse(statusCode: 400, type: typeof(ErrorResponse), description: "Отсутствует заголовок.")]
@@ -120,10 +138,14 @@ public class BookingController: ControllerBase
     [SwaggerResponse(statusCode: 500, type: typeof(ErrorResponse), description: "Ошибка на стороне сервера.")]
     public async Task<ActionResult<ReservationDtoWithHotelAndPayment>> GetReservation([FromRoute] Guid reservationUid)
     {
-        var username = Request.Headers["X-User-Name"].FirstOrDefault();
+        var username = _userContext.GetUsername();
         
+        /*if (string.IsNullOrEmpty(username))
+            return BadRequest("X-User-Name header is required");*/
         if (string.IsNullOrEmpty(username))
-            return BadRequest("X-User-Name header is required");
+        {
+            return Unauthorized(new { message = "Username Unauthorized" });
+        }
 
         var response = await _gatewayService.GetReservationAsync(username, reservationUid);
         
@@ -151,16 +173,21 @@ public class BookingController: ControllerBase
     /// <response code="404">Отель не найден.</response>
     /// <response code="500">Ошибка на стороне сервера.</response>
     [HttpPost("reservations")]
+    [Authorize]
     [SwaggerOperation("Метод для бронирования отеля.", "Метод для бронирования отеля.")]
     [SwaggerResponse(statusCode: 200, description: "Бронирование успешно создано.")]
     [SwaggerResponse(statusCode: 400, type: typeof(ErrorResponse), description: "Отсутствует заголовок или невалидные данные запроса.")]
     [SwaggerResponse(statusCode: 500, type: typeof(ErrorResponse), description: "Ошибка на стороне сервера.")]
     public async Task<ActionResult<CreateReservationResponse>> CreateReservation([FromBody] CreateReservationRequest request)
     {
-        var username = Request.Headers["X-User-Name"].FirstOrDefault();
+        var username = _userContext.GetUsername();
         
+        /*if (string.IsNullOrEmpty(username))
+            return BadRequest("X-User-Name header is required");*/
         if (string.IsNullOrEmpty(username))
-            return BadRequest("X-User-Name header is required");
+        {
+            return Unauthorized(new { message = "Username Unauthorized" });
+        }
 
         var response = await _gatewayService.CreateReservationAsync(username, request);
         
@@ -186,6 +213,7 @@ public class BookingController: ControllerBase
     /// <response code="404">Бронирование не найдено.</response>
     /// <response code="500">Ошибка на стороне сервера.</response>
     [HttpDelete("reservations/{reservationUid}")]
+    [Authorize]
     [SwaggerOperation("Метод для отмены бронирования отеля.", "Метод для отмены бронирования отеля.")]
     [SwaggerResponse(statusCode: 204, description: "Бронирование успешно отменено.")]
     [SwaggerResponse(statusCode: 400, type: typeof(ErrorResponse), description: "Отсутствует заголовок.")]
@@ -193,10 +221,14 @@ public class BookingController: ControllerBase
     [SwaggerResponse(statusCode: 500, type: typeof(ErrorResponse), description: "Ошибка на стороне сервера.")]
     public async Task<IActionResult> CancelReservation(Guid reservationUid)
     {
-        var username = Request.Headers["X-User-Name"].FirstOrDefault();
+        var username = _userContext.GetUsername();
         
+        /*if (string.IsNullOrEmpty(username))
+            return BadRequest("X-User-Name header is required");*/
         if (string.IsNullOrEmpty(username))
-            return BadRequest("X-User-Name header is required");
+        {
+            return Unauthorized(new { message = "Username Unauthorized" });
+        }
 
         var response = await _gatewayService.CancelReservationAsync(username, reservationUid);
         
@@ -216,15 +248,21 @@ public class BookingController: ControllerBase
     /// <response code="404">Информация о программе лояльности не найдена.</response>
     /// <response code="500">Ошибка на стороне сервера.</response>
     [HttpGet("loyalty")]
+    [Authorize]
     [SwaggerOperation("Метод для получения статуса лояльности.", "Метод для получения статуса лояльности.")]
     [SwaggerResponse(statusCode: 200, description: "Статус лояльности успешно получен.")]
     [SwaggerResponse(statusCode: 400, type: typeof(ErrorResponse), description: "Отсутствует заголовок.")]
     [SwaggerResponse(statusCode: 500, type: typeof(ErrorResponse), description: "Ошибка на стороне сервера.")]
     public async Task<ActionResult<LoyaltyInfoDto>> GetLoyaltyInfo()
     {
-        var username = Request.Headers["X-User-Name"].FirstOrDefault();
+        var username = _userContext.GetUsername();
+        
+        /*if (string.IsNullOrEmpty(username))
+            return BadRequest("X-User-Name header is required");*/
         if (string.IsNullOrEmpty(username))
-            return BadRequest("X-User-Name header is required");
+        {
+            return Unauthorized(new { message = "Username Unauthorized" });
+        }
 
         var response = await _gatewayService.GetLoyaltyInfoAsync(username);
         

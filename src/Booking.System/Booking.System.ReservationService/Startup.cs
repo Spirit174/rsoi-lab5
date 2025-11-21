@@ -3,6 +3,8 @@ using Booking.System.ReservationService.Core.Services;
 using Booking.System.ReservationService.DataBase.Repositories;
 using Microsoft.OpenApi.Models;
 using Booking.System.ReservationService.Extensions;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
 
 namespace Booking.System.ReservationService;
 
@@ -21,9 +23,53 @@ public class Startup
         
         services.AddSwaggerGen(c =>
         {
-            c.SwaggerDoc("v1", new OpenApiInfo { Title = "Person.Server", Version = "v1" });
-
+            c.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo
+            {
+                Title = "Booking System",
+                Version = "v1",
+            });
+            c.AddSecurityDefinition("Bearer", new Microsoft.OpenApi.Models.OpenApiSecurityScheme
+            {
+                In = Microsoft.OpenApi.Models.ParameterLocation.Header,
+                Description = "Enter JWT token",
+                Name = "Authorization",
+                Type = Microsoft.OpenApi.Models.SecuritySchemeType.ApiKey,
+                Scheme = "Bearer"
+            });
+            c.AddSecurityRequirement(new Microsoft.OpenApi.Models.OpenApiSecurityRequirement
+            {
+                {
+                    new Microsoft.OpenApi.Models.OpenApiSecurityScheme
+                    {
+                        Reference = new Microsoft.OpenApi.Models.OpenApiReference
+                        {
+                            Type = Microsoft.OpenApi.Models.ReferenceType.SecurityScheme,
+                            Id = "Bearer"
+                        }
+                    },
+                    new string[] {}
+                }
+            });
         });
+        
+        services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+            .AddJwtBearer(options =>
+            {
+                options.Authority = "http://keycloak:8080/realms/booking";
+                options.Audience = "booking-client";
+                options.RequireHttpsMetadata = false;
+                options.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuer = true,
+                    ValidateAudience = false,
+                    ValidateLifetime = true,
+                    ValidateIssuerSigningKey = true,
+                    ValidIssuer = "http://keycloak:8080/realms/booking"
+                };
+            });
+
+        services.AddAuthorization();
+
         services.AddSwaggerGenNewtonsoftSupport();
         
         services.AddDbContext(Configuration);
@@ -52,6 +98,8 @@ public class Startup
             c.RoutePrefix = "api/v1/swagger";
         });
         app.UseRouting();
+        app.UseAuthentication();
+        app.UseAuthorization();
 
         app.UseEndpoints(endpoints =>
         {

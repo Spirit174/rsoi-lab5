@@ -2,6 +2,7 @@
 using Booking.System.ReservationService.Core.Interfaces;
 using Booking.System.ReservationService.DTO.Converters;
 using Booking.System.ReservationService.DTO.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Booking.System.ReservationService.Controllers;
@@ -24,6 +25,7 @@ public class HotelController: ControllerBase
     /// Получить страницу отелей.
     /// </summary>
     [HttpGet("hotels")]
+    [Authorize]
     public async Task<ActionResult<HotelPagesDto>> GetHotelsPages([FromQuery] int page, [FromQuery] int size)
     {
         _logger.LogInformation($"GetHotelsPages: {page}/{size}");
@@ -49,6 +51,7 @@ public class HotelController: ControllerBase
     /// Получить отель по идентификатору.
     /// </summary>
     [HttpGet("hotels/{hotelId}")]
+    [Authorize]
     public async Task<ActionResult<HotelDto>> GetHotelById([FromRoute] Guid hotelId)
     {
         _logger.LogInformation($"GetHotelById: {hotelId}");

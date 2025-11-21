@@ -1,6 +1,7 @@
 ﻿using Booking.System.ReservationService.Core.Interfaces;
 using Booking.System.ReservationService.DTO.Converters;
 using Booking.System.ReservationService.DTO.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Booking.System.ReservationService.Controllers;
@@ -23,6 +24,7 @@ public class ReservationController: ControllerBase
     /// Отмена бронирования.
     /// </summary>
     [HttpPost("reservations/{reservationId}")]
+    [Authorize]
     public async Task<ActionResult> CancelReservation([FromRoute] Guid reservationId)
     {
         _logger.LogInformation($"CancelReservation: {reservationId}");
@@ -45,6 +47,7 @@ public class ReservationController: ControllerBase
     /// Получить информацию о бронировании по идентифкатору.
     /// </summary>
     [HttpGet("reservations/{reservationId}")]
+    [Authorize]
     public async Task<ActionResult<ReservationDto>> GetReservationId([FromRoute] Guid reservationId)
     {
         _logger.LogInformation($"GetReservationId: {reservationId}");
@@ -69,6 +72,7 @@ public class ReservationController: ControllerBase
     /// Создать бронь.
     /// </summary>
     [HttpPost("reservations")]
+    [Authorize]
     public async Task<ActionResult> CreateReservation([FromBody] CreateReservationDto createReservationDto)
     {
         _logger.LogInformation($"CreateReservation: {createReservationDto}");
@@ -91,6 +95,7 @@ public class ReservationController: ControllerBase
     /// Получить все брони пользователя.
     /// </summary>
     [HttpGet("reservations/user/{userName}")]
+    [Authorize]
     public async Task<ActionResult<List<ReservationDto>>> GetReservationsById([FromRoute] string userName)
     {
         _logger.LogInformation($"GetReservationsById: {userName}");

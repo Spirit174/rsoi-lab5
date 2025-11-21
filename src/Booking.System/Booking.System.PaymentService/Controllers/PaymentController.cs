@@ -1,6 +1,7 @@
 ﻿using Booking.System.PaymentService.Core.Interfaces;
 using Booking.System.PaymentService.DTO.Converters;
 using Booking.System.PaymentService.DTO.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Booking.System.PaymentService.Controllers;
@@ -23,6 +24,7 @@ public class PaymentController: ControllerBase
     /// Отменить платеж.
     /// </summary>
     [HttpPut("payment/{paymentId}")]
+    [Authorize]
     public async Task<ActionResult> UpdatePayment([FromRoute] Guid paymentId)
     {
         _logger.LogInformation($"UpdatePayment: {paymentId}");
@@ -47,6 +49,7 @@ public class PaymentController: ControllerBase
     /// Создать платеж.
     /// </summary>
     [HttpPost("payment/{price}")]
+    [Authorize]
     public async Task<ActionResult<PaymentIdDto>> CreatePayment([FromRoute] int price)
     {
         _logger.LogInformation($"CreatePayment: {price}");
@@ -68,6 +71,7 @@ public class PaymentController: ControllerBase
     /// Получить платеж по идентификатору.
     /// </summary>
     [HttpGet("payment/{paymentId}")]
+    [Authorize]
     public async Task<ActionResult<PaymentInfoDto>> GetPayment([FromRoute] Guid paymentId)
     {
         _logger.LogInformation($"GetPayment: {paymentId}");

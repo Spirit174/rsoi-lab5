@@ -1,6 +1,7 @@
 ﻿using Booking.System.LoyaltyService.Core.Interfaces;
 using Booking.System.LoyaltyService.DTO.Converters;
 using Booking.System.LoyaltyService.DTO.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Booking.System.LoyaltyService.Controllers;
@@ -23,6 +24,7 @@ public class LoyaltyController: ControllerBase
     /// Получить информацию о статусе в программе лояльности.
     /// </summary>
     [HttpGet("loyalty/{userName}")]
+    [Authorize]
     public async Task<ActionResult<LoyaltyInfoDto>> GetLoyaltyInfo([FromRoute] string userName)
     {
         try
@@ -45,6 +47,7 @@ public class LoyaltyController: ControllerBase
     /// Обновить после бронирования или отмены бронирования.
     /// </summary>
     [HttpPost("loyalty/{userName}")]
+    [Authorize]
     public async Task<ActionResult> UpdateLoyalty([FromRoute] string userName, [FromBody] IncreaseBool isIncreaseBool)
     {
         try
