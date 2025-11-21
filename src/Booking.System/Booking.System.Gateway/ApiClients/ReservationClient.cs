@@ -21,7 +21,7 @@ public class ReservationClient: IReservationClient
         _clientsConfiguration = clientsConfiguration.Value;
         _logger = logger;
         _circuitBreaker = circuitBreaker;
-        _client = new RestClient("http://reservation.spirit.svc.cluster.local:8070/",
+        _client = new RestClient("http://reservation_service:8070/",
             configureRestClient: c => { c.ThrowOnAnyError = true; },
             configureSerialization: s => { s.UseNewtonsoftJson(); });
         

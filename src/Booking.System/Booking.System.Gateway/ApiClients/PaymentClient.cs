@@ -22,7 +22,7 @@ public class PaymentClient: IPaymentClient
         _clientsConfiguration = clientsConfiguration.Value;
         _logger = logger;
         _circuitBreaker = circuitBreaker;
-        _client = new RestClient("http://payment.spirit.svc.cluster.local:8060/",
+        _client = new RestClient("http://payment_service:8060/",
             configureRestClient: c => { c.ThrowOnAnyError = true; },
             configureSerialization: s => { s.UseNewtonsoftJson(); });
         
