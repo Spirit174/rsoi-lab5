@@ -3,6 +3,7 @@ using Booking.System.LoyaltyService.DTO.Converters;
 using Booking.System.LoyaltyService.DTO.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.IdentityModel.Claims;
 
 namespace Booking.System.LoyaltyService.Controllers;
 
@@ -30,7 +31,18 @@ public class LoyaltyController: ControllerBase
         try
         {
             _logger.LogInformation($"GetLoyaltyInfo: {userName}");
-            var loyalty = await _loyaltyService.GetLoyaltyAndCreateIfNotExist(userName);
+            var username = User.FindFirst(ClaimTypes.NameIdentifier)?.Value 
+                           ?? User.FindFirst("preferred_username")?.Value 
+                           ?? User.FindFirst("sub")?.Value;
+
+            if (string.IsNullOrEmpty(username))
+            {
+                return Unauthorized("Username not found in token");
+            }
+            
+            _logger.LogInformation($"GetLoyaltyInfo: {username}");
+            
+            var loyalty = await _loyaltyService.GetLoyaltyAndCreateIfNotExist(username);
 
             return Ok(LoyaltyInfoDtoConverter.Convert(loyalty));
         }
@@ -52,8 +64,17 @@ public class LoyaltyController: ControllerBase
     {
         try
         {
-            _logger.LogInformation($"UpdateLoyalty: {userName}");
-            var loyalty = await _loyaltyService.GetLoyaltyAndCreateIfNotExist(userName);
+            var username = User.FindFirst(ClaimTypes.NameIdentifier)?.Value 
+                           ?? User.FindFirst("preferred_username")?.Value 
+                           ?? User.FindFirst("sub")?.Value;
+
+            if (string.IsNullOrEmpty(username))
+            {
+                return Unauthorized("Username not found in token");
+            }
+            
+            _logger.LogInformation($"UpdateLoyalty: {username}");
+            var loyalty = await _loyaltyService.GetLoyaltyAndCreateIfNotExist(username);
 
             await _loyaltyService.UpdateLoyalty(loyalty.Username, isIncreaseBool.IsIncrease);
 

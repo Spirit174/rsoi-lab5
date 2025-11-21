@@ -3,6 +3,7 @@ using Booking.System.ReservationService.DTO.Converters;
 using Booking.System.ReservationService.DTO.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.IdentityModel.Claims;
 
 namespace Booking.System.ReservationService.Controllers;
 
@@ -101,7 +102,16 @@ public class ReservationController: ControllerBase
         _logger.LogInformation($"GetReservationsById: {userName}");
         try
         {
-            var reservations = await _reservationService.GetReservationByUserNameAsync(userName);
+            var username = User.FindFirst(ClaimTypes.NameIdentifier)?.Value 
+                           ?? User.FindFirst("preferred_username")?.Value 
+                           ?? User.FindFirst("sub")?.Value;
+
+            if (string.IsNullOrEmpty(username))
+            {
+                return Unauthorized("Username not found in token");
+            }
+            
+            var reservations = await _reservationService.GetReservationByUserNameAsync(username);
 
             return Ok(reservations.ConvertAll(ReservationConverter.Convert));
         }
