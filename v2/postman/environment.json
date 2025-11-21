@@ -4,32 +4,32 @@
   "values": [
     {
       "key": "serviceUrl",
-      "value": "",
+      "value": "http://localhost:8080",
       "enabled": true
     },
     {
       "key": "identityProviderUrl",
-      "value": "",
+      "value": "http://localhost:8080",
       "enabled": true
     },
     {
       "key": "username",
-      "value": "",
+      "value": "spirit@test.com",
       "enabled": true
     },
     {
       "key": "password",
-      "value": "",
+      "value": "pass",
       "enabled": true
     },
     {
       "key": "clientId",
-      "value": "",
+      "value": "booking-client",
       "enabled": true
     },
     {
       "key": "clientSecret",
-      "value": "",
+      "value": "THIS_is_VEry_secretic_for_EVERYONE-access_toGETyes",
       "enabled": true
     }
   ],
