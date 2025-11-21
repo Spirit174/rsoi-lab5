@@ -15,9 +15,12 @@ public class PaymentClient: IPaymentClient
     private readonly RestClient _client;
     private readonly ILogger<PaymentClient> _logger;
     private readonly CircuitBreaker.CircuitBreaker _circuitBreaker;
+    private readonly IHttpContextAccessor _httpContextAccessor;
 
     public PaymentClient(IOptions<ClientsConfiguration> clientsConfiguration,
-        ILogger<PaymentClient> logger, CircuitBreaker.CircuitBreaker circuitBreaker)
+        ILogger<PaymentClient> logger,
+        CircuitBreaker.CircuitBreaker circuitBreaker,
+        IHttpContextAccessor httpContextAccessor)
     {
         _clientsConfiguration = clientsConfiguration.Value;
         _logger = logger;
@@ -26,7 +29,13 @@ public class PaymentClient: IPaymentClient
             configureRestClient: c => { c.ThrowOnAnyError = true; },
             configureSerialization: s => { s.UseNewtonsoftJson(); });
         
+        _httpContextAccessor = httpContextAccessor;
         _circuitBreaker.RegisterHealthCheck("PaymentService", HealthCheckAsync);
+    }
+    
+    private string? GetAuthToken()
+    {
+        return _httpContextAccessor.HttpContext?.Request.Headers["Authorization"].FirstOrDefault();
     }
 
     private async Task<bool> HealthCheckAsync()
@@ -51,6 +60,12 @@ public class PaymentClient: IPaymentClient
             {
                 var requestUrl = $"api/v1/payment/{paymentId}";
                 var request = new RestRequest(requestUrl, Method.Get);
+                
+                var token = GetAuthToken();
+                if (!string.IsNullOrEmpty(token))
+                {
+                    request.AddHeader("Authorization", token);
+                }
 
                 _logger.LogDebug("Payment API call {Method} {RequestUrl}. To get payment by id {PaymentId}",
                     request.Method, requestUrl, paymentId);
@@ -89,6 +104,12 @@ public class PaymentClient: IPaymentClient
             {
                 var requestUrl = $"api/v1/payment/{paymentId}";
                 var request = new RestRequest(requestUrl, Method.Put);
+                
+                var token = GetAuthToken();
+                if (!string.IsNullOrEmpty(token))
+                {
+                    request.AddHeader("Authorization", token);
+                }
 
                 _logger.LogDebug("Payment API call {Method} {RequestUrl}. To update payment by id {PaymentId}",
                     request.Method, requestUrl, paymentId);
@@ -125,6 +146,12 @@ public class PaymentClient: IPaymentClient
             {
                 var requestUrl = $"api/v1/payment/{price}";
                 var request = new RestRequest(requestUrl, Method.Post);
+                
+                var token = GetAuthToken();
+                if (!string.IsNullOrEmpty(token))
+                {
+                    request.AddHeader("Authorization", token);
+                }
 
                 _logger.LogDebug("Payment API call {Method} {RequestUrl}. To create payment with price {Price}",
                     request.Method, requestUrl, price);

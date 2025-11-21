@@ -12,9 +12,12 @@ public class LoyaltyClient : ILoyaltyClient
     private readonly RestClient _client;
     private readonly ILogger<LoyaltyClient> _logger;
     private readonly CircuitBreaker.CircuitBreaker _circuitBreaker;
+    private readonly IHttpContextAccessor _httpContextAccessor;
 
     public LoyaltyClient(IOptions<ClientsConfiguration> clientsConfiguration,
-        ILogger<LoyaltyClient> logger, CircuitBreaker.CircuitBreaker circuitBreaker)
+        ILogger<LoyaltyClient> logger,
+        CircuitBreaker.CircuitBreaker circuitBreaker,
+        IHttpContextAccessor httpContextAccessor)
     {
         _clientsConfiguration = clientsConfiguration.Value;
         _logger = logger;
@@ -23,7 +26,13 @@ public class LoyaltyClient : ILoyaltyClient
             configureRestClient: c => { c.ThrowOnAnyError = true; },
             configureSerialization: s => { s.UseNewtonsoftJson(); });
         
+        _httpContextAccessor = httpContextAccessor;
         _circuitBreaker.RegisterHealthCheck("LoyaltyService", HealthCheckAsync);
+    }
+    
+    private string? GetAuthToken()
+    {
+        return _httpContextAccessor.HttpContext?.Request.Headers["Authorization"].FirstOrDefault();
     }
 
     private async Task<bool> HealthCheckAsync()
@@ -48,6 +57,12 @@ public class LoyaltyClient : ILoyaltyClient
             {
                 var requestUrl = $"api/v1/loyalty/{userName}";
                 var request = new RestRequest(requestUrl, Method.Get);
+                
+                var token = GetAuthToken();
+                if (!string.IsNullOrEmpty(token))
+                {
+                    request.AddHeader("Authorization", token);
+                }
 
                 _logger.LogDebug("Loyalty API call {Method} {RequestUrl}. To get loyalty for username {UserName}",
                     request.Method, requestUrl, userName);
@@ -86,6 +101,12 @@ public class LoyaltyClient : ILoyaltyClient
 
                 var request = new RestRequest(requestUrl, Method.Post)
                     .AddJsonBody(requestBody);
+                
+                var token = GetAuthToken();
+                if (!string.IsNullOrEmpty(token))
+                {
+                    request.AddHeader("Authorization", token);
+                }
 
                 _logger.LogDebug("Loyalty API call {Method} {RequestUrl}. To update loyalty for username {UserName}",
                     request.Method, requestUrl, userName);

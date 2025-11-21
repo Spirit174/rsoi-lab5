@@ -14,9 +14,12 @@ public class ReservationClient: IReservationClient
     private readonly RestClient _client;
     private readonly ILogger<ReservationClient> _logger;
     private readonly CircuitBreaker.CircuitBreaker _circuitBreaker;
+    private readonly IHttpContextAccessor _httpContextAccessor;
 
     public ReservationClient(IOptions<ClientsConfiguration> clientsConfiguration,
-        ILogger<ReservationClient> logger, CircuitBreaker.CircuitBreaker circuitBreaker)
+        ILogger<ReservationClient> logger,
+        CircuitBreaker.CircuitBreaker circuitBreaker,
+        IHttpContextAccessor httpContextAccessor)
     {
         _clientsConfiguration = clientsConfiguration.Value;
         _logger = logger;
@@ -25,7 +28,13 @@ public class ReservationClient: IReservationClient
             configureRestClient: c => { c.ThrowOnAnyError = true; },
             configureSerialization: s => { s.UseNewtonsoftJson(); });
         
+        _httpContextAccessor = httpContextAccessor;
         _circuitBreaker.RegisterHealthCheck("ReservationService", HealthCheckAsync);
+    }
+    
+    private string? GetAuthToken()
+    {
+        return _httpContextAccessor.HttpContext?.Request.Headers["Authorization"].FirstOrDefault();
     }
 
     private async Task<bool> HealthCheckAsync()
@@ -50,6 +59,12 @@ public class ReservationClient: IReservationClient
         {
             var requestUrl = $"api/v1/hotels?page={page}&size={size}";
             var request = new RestRequest(requestUrl, Method.Get);
+            
+            var token = GetAuthToken();
+            if (!string.IsNullOrEmpty(token))
+            {
+                request.AddHeader("Authorization", token);
+            }
 
             _logger.LogDebug("Reservation API call {Method} {RequestUrl}. To get hotels page:{Page} with size:{Size}",
                 request.Method, requestUrl, page, size);
@@ -81,6 +96,12 @@ public async Task<ServiceResponse<HotelDto>> GetHotelByIdAsync(Guid hotelId)
         {
             var requestUrl = $"api/v1/hotels/{hotelId}";
             var request = new RestRequest(requestUrl, Method.Get);
+            
+            var token = GetAuthToken();
+            if (!string.IsNullOrEmpty(token))
+            {
+                request.AddHeader("Authorization", token);
+            }
 
             _logger.LogDebug("Reservation API call {Method} {RequestUrl}. To get hotel by Id {HotelId}",
                 request.Method, requestUrl, hotelId);
@@ -120,6 +141,12 @@ public async Task<ServiceResponse<HotelDto>> GetHotelByIdAsync(Guid hotelId)
             {
                 var requestUrl = $"api/v1/reservations/{reservationId}";
                 var request = new RestRequest(requestUrl, Method.Post);
+                
+                var token = GetAuthToken();
+                if (!string.IsNullOrEmpty(token))
+                {
+                    request.AddHeader("Authorization", token);
+                }
 
                 _logger.LogDebug("Reservation API call {Method} {RequestUrl}. To cancel reservation by Id {ReservationId}",
                     request.Method, requestUrl, reservationId);
@@ -157,6 +184,12 @@ public async Task<ServiceResponse<HotelDto>> GetHotelByIdAsync(Guid hotelId)
             {
                 var requestUrl = $"api/v1/reservations/{reservationId}";
                 var request = new RestRequest(requestUrl, Method.Get);
+                
+                var token = GetAuthToken();
+                if (!string.IsNullOrEmpty(token))
+                {
+                    request.AddHeader("Authorization", token);
+                }
 
                 _logger.LogDebug("Reservation API call {Method} {RequestUrl}. To get reservation by Id {ReservationId}",
                     request.Method, requestUrl, reservationId);
@@ -197,6 +230,12 @@ public async Task<ServiceResponse<HotelDto>> GetHotelByIdAsync(Guid hotelId)
                 var requestUrl = $"api/v1/reservations";
                 var request = new RestRequest(requestUrl, Method.Post)
                     .AddJsonBody(createReservationDto);
+                
+                var token = GetAuthToken();
+                if (!string.IsNullOrEmpty(token))
+                {
+                    request.AddHeader("Authorization", token);
+                }
 
                 _logger.LogDebug("Reservation API call {Method} {RequestUrl}. To create reservation with PaymentUid {PaymentUid}",
                     request.Method, requestUrl, createReservationDto.PaymentUid);
@@ -227,6 +266,12 @@ public async Task<ServiceResponse<HotelDto>> GetHotelByIdAsync(Guid hotelId)
             {
                 var requestUrl = $"api/v1/reservations/user/{userName}";
                 var request = new RestRequest(requestUrl, Method.Get);
+                
+                var token = GetAuthToken();
+                if (!string.IsNullOrEmpty(token))
+                {
+                    request.AddHeader("Authorization", token);
+                }
 
                 _logger.LogDebug("Reservation API call {Method} {RequestUrl}. To get reservation by username {UserName}",
                     request.Method, requestUrl, userName);
