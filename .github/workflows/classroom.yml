@@ -55,6 +55,7 @@ jobs:
           sleep 20
 
           chmod +x ./scripts/keycloak-setup.sh
+          chmod +x ./scripts/wait-script.sh
           ./scripts/keycloak-setup.sh
           
           ./scripts/wait-script.sh
